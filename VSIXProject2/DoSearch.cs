@@ -27,7 +27,7 @@ namespace VSIXProject2
                             var rrr = fileitem.FileCodeModel;
                             foreach (CodeElement element in rrr.CodeElements)
                             {
-                                
+
 
                                 ////فقط میره نام namespace رو سرچ میکنه که به کار ما نمیاد ما باید بریم داخل nampcespace
                                 var find = element.Name.FirstOrDefault(x => element.Name.Contains("test"));
@@ -38,7 +38,7 @@ namespace VSIXProject2
                                         var yyyy = Child.Name;
                                         ///اینجا تازه ما میرسیم به روی کلاس باید بریم داخل کلاس که چند تا متد داره و روی اون ها سرچ کنه 
                                         var findtochild = yyyy.FirstOrDefault(x => yyyy.Contains("yy"));
-                                       
+
                                         foreach (CodeElement child2 in Child.Children)
                                         {
                                             var bbbb = child2.Name;
@@ -48,52 +48,69 @@ namespace VSIXProject2
                                             {
                                                 EditPoint start = method.GetStartPoint().CreateEditPoint();
                                                 string body = start.GetText(method.GetEndPoint());
-                                              
-         
-                                                if (body.Contains("C"))
-                                                {
-                                                    body = body.Replace("c", "");
-                                                    ///"TextDocument" یک مقدار شناخته شده هست برای ویژوال که یک فایل رو میگیره 
-                                                    TextDocument textDoc = (TextDocument)fileitem.Document.Object("TextDocument");
 
-                                                    EditPoint startpoint = textDoc.StartPoint.CreateEditPoint();
-                                                    EditPoint endpoint = textDoc.EndPoint.CreateEditPoint();
-                                                    start.Delete(endpoint);
-                                                    start.Insert(body);
+                                                ///هر جا که رسیدی به علامن /n بریزش توی یک آرایه دیگه 
+                                                string[] lines = body.Split('\n');
+                                                for (int i = 0; i < lines.Length; i++)
+                                                {
+                                                    string line = lines[i];
+                                                    if (line.Trim().Contains("(") && line.Trim().Contains(")"))
+                                                    {
+                                                        line = line.Replace("(", "").Replace(")", "");
+                                                        lines[i] = line;
+
+                                                    }
+                                                    ///هر وقت به آخرین اندیس lines رسیدی بعدش ذخیره کن
+                                                    if(i==lines.Length-1)
+                                                    { 
+                                                    string Filename = "FileName " + Guid.NewGuid();
+                                                    string finalText = string.Join(Environment.NewLine, lines);
+                                                    File.WriteAllText($@"D:\New folder\{Filename}.txt", finalText);
+                                                    }
                                                 }
+                                       
+
+
+                                                /// برای زمانی هست که میخواد تغییرات رو خود پروژه اعمال بشه 
+                                                //TextDocument textDoc = (TextDocument)fileitem.Document.Object("TextDocument");
+                                                //EditPoint startpoint = textDoc.StartPoint.CreateEditPoint();
+                                                //EditPoint endpoint = textDoc.EndPoint.CreateEditPoint();
+                                                //startpoint.Delete(endpoint);
+                                                //startpoint.Insert(lines.ToString());
+
                                             }
 
 
-                                                foreach (CodeElement child3 in child2.Children)
-                                                {
-                                                    var ccc = child3.Name;
-                                                }
-
+                                            foreach (CodeElement child3 in child2.Children)
+                                            {
+                                                var ccc = child3.Name;
                                             }
 
                                         }
 
                                     }
-                                    if (find != null)
-                                    {
-
-                                    }
-
 
                                 }
+                                if (find != null)
+                                {
+
+                                }
+
 
                             }
 
                         }
 
                     }
-                    string res = string.Join(" ", change);
 
-                    return res;
                 }
-                return "nul";
+                string res = string.Join(" ", change);
 
+                return res;
             }
+            return "nul";
 
         }
+
     }
+}
