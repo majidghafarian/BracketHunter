@@ -24,13 +24,12 @@ namespace VSIXProject2
                         var CsName = fileitem.Name;
                         if (fileitem.Name.EndsWith(".cs"))
                         {
+
+
                             var rrr = fileitem.FileCodeModel;
                             foreach (CodeElement element in rrr.CodeElements)
                             {
 
-
-                                ////فقط میره نام namespace رو سرچ میکنه که به کار ما نمیاد ما باید بریم داخل nampcespace
-                                var find = element.Name.FirstOrDefault(x => element.Name.Contains("test"));
                                 if (element.Kind == vsCMElement.vsCMElementNamespace)
                                 {
                                     foreach (CodeElement Child in element.Children)
@@ -53,22 +52,32 @@ namespace VSIXProject2
                                                 string[] lines = body.Split('\n');
                                                 for (int i = 0; i < lines.Length; i++)
                                                 {
-                                                    string line = lines[i];
-                                                    if (line.Trim().Contains("(") && line.Trim().Contains(")"))
+                                                    /////اینجا گیر کردم
+                                                    if (lines[0]!=  lines.Contains("[") && lines.Contains("]"))
                                                     {
-                                                        line = line.Replace("(", "").Replace(")", "");
-                                                        lines[i] = line;
+                                                        continue;
 
                                                     }
-                                                    ///هر وقت به آخرین اندیس lines رسیدی بعدش ذخیره کن
-                                                    if(i==lines.Length-1)
+                                                    string line = lines[i];
+                                                    if (line.Trim().Contains("[") && line.Trim().Contains("]"))
+                                                    {
+                                                        // ✅ داخل این if فقط وقتی میاد که هم [ و هم ] وجود دارن
+                                                        int starts = line.IndexOf('[');
+                                                        int end = line.IndexOf(']');
+                                                        string between = line.Substring(starts + 1, end - starts - 1);
+                                                      
+                                                        lines[i] = between;
+                                                    }
+                                                   if(i==lines.Length-1)
                                                     { 
-                                                    string Filename = "FileName " + Guid.NewGuid();
+                                                    string Filename = fileitem.Name + " " + child2.Name + Guid.NewGuid();
                                                     string finalText = string.Join(Environment.NewLine, lines);
                                                     File.WriteAllText($@"D:\New folder\{Filename}.txt", finalText);
                                                     }
                                                 }
-                                       
+
+                                                ///هر وقت به آخرین اندیس lines رسیدی بعدش ذخیره کن
+
 
 
                                                 /// برای زمانی هست که میخواد تغییرات رو خود پروژه اعمال بشه 
@@ -91,11 +100,6 @@ namespace VSIXProject2
                                     }
 
                                 }
-                                if (find != null)
-                                {
-
-                                }
-
 
                             }
 
