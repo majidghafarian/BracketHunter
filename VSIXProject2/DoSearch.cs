@@ -5,28 +5,76 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace VSIXProject2
 {
+    public static class MyCache
+    {
+        public static Dictionary<string, object> Data = new Dictionary<string, object>();
+
+        public static void SaveToCache(string key, string value)
+        {
+            if (Data.ContainsKey(key))
+            {
+                Data[key] = value;
+
+            }
+            else
+            {
+                Data.Add(key, value);
+            }
+        }
+        public static string GetFile()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var res in Data)
+            {
+                sb.AppendLine(res.Value.ToString());
+                sb.AppendLine("\n");
+
+            }
+            return sb.ToString();
+        }
+    }
+    public static class Save
+    { 
+        
+        public static void SaveTofile(string key, string value)
+        {
+
+            File.WriteAllText($@"D:\New folder\{key}", value);
+
+        }
+
+    }
     public static class DoSearch
     {
+
         public static string Solotions()
         {
             List<string> change = new List<string>();
             DTE dte = Package.GetGlobalService(typeof(DTE)) as DTE;
             if (dte != null && dte.Solution != null)
             {
+                List<ProjectItem> allCsFiles = new List<ProjectItem>();
 
                 foreach (Project item in dte.Solution.Projects)
                 {
                     foreach (ProjectItem fileitem in item.ProjectItems)
                     {
+                        ////اینجا باید بگم هر موقع fileitem تموم شد بریزه توی یک فایل و استخراج منه
                         var CsName = fileitem.Name;
                         if (fileitem.Name.EndsWith(".cs"))
                         {
 
 
                             var rrr = fileitem.FileCodeModel;
+                            if (rrr == null)
+                            {
+                                continue;
+                            }
                             foreach (CodeElement element in rrr.CodeElements)
                             {
 
@@ -50,29 +98,30 @@ namespace VSIXProject2
 
                                                 ///هر جا که رسیدی به علامن /n بریزش توی یک آرایه دیگه 
                                                 string[] lines = body.Split('\n');
+                                                List<string> extracted = new List<string>(); // فقط مقادیر داخل [ ] میرن اینجا
                                                 for (int i = 0; i < lines.Length; i++)
                                                 {
-                                                    /////اینجا گیر کردم
-                                                    if (lines[0]!=  lines.Contains("[") && lines.Contains("]"))
-                                                    {
-                                                        continue;
 
-                                                    }
+                                                    ///اینجا گیر کردم
+                                                    //if (!lines[i] lines.Contains("[") && lines.Contains("]"))
+                                                    //{
+                                                    //    continue;
+
+                                                    //}
                                                     string line = lines[i];
-                                                    if (line.Trim().Contains("[") && line.Trim().Contains("]"))
+                                                    var matches = Regex.Matches(line, @"\[(.*?)\]");
+                                                    foreach (Match match in matches)
                                                     {
-                                                        // ✅ داخل این if فقط وقتی میاد که هم [ و هم ] وجود دارن
-                                                        int starts = line.IndexOf('[');
-                                                        int end = line.IndexOf(']');
-                                                        string between = line.Substring(starts + 1, end - starts - 1);
-                                                      
-                                                        lines[i] = between;
+                                                        extracted.Add(match.Groups[1].Value);
                                                     }
-                                                   if(i==lines.Length-1)
-                                                    { 
-                                                    string Filename = fileitem.Name + " " + child2.Name + Guid.NewGuid();
-                                                    string finalText = string.Join(Environment.NewLine, lines);
-                                                    File.WriteAllText($@"D:\New folder\{Filename}.txt", finalText);
+                                                    if (i == lines.Length - 1)
+                                                    {
+
+                                                        string Filename = $"{fileitem.Name}_{child2.Name}_{Guid.NewGuid()}.txt";
+                                                        string finalText = string.Join(Environment.NewLine, extracted);
+                                                        MyCache.SaveToCache(Filename, finalText);
+                                                        //File.WriteAllText($@"D:\New folder\{Filename}", finalText);
+
                                                     }
                                                 }
 
@@ -106,6 +155,11 @@ namespace VSIXProject2
                         }
 
                     }
+
+                    string Filenames = $"{Guid.NewGuid()}.txt";
+                    var res2222 = MyCache.GetFile();
+                    Save.SaveTofile(Filenames, res2222);
+
 
                 }
                 string res = string.Join(" ", change);
