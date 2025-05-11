@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using static VSIXProject2.MyCache;
 using Task = System.Threading.Tasks.Task;
 
 namespace VSIXProject2
