@@ -58,10 +58,15 @@ namespace VSIXProject2
             {
                 collect.Add(item);
             }
-            foreach (ProjectItem child in item.ProjectItems)
-            {
-                CsFiles(child, collect);
 
+
+            if (item.ProjectItems != null)
+            {
+                foreach (ProjectItem child in item.ProjectItems)
+                {
+                    CsFiles(child, collect);
+
+                }
             }
         }
 
@@ -108,11 +113,11 @@ namespace VSIXProject2
                                         if (children2 is CodeFunction method)
                                         {
 
-                                            ////اینجارو گزاشتم فقط ارور نده تا ببینم بعدش چی میشه
-                                            if (method == null && method.StartPoint == null)
-                                            {
-                                                continue;
-                                            }
+                                            //////اینجارو گزاشتم فقط ارور نده تا ببینم بعدش چی میشه
+                                            //if (method == null && method.StartPoint == null)
+                                            //{
+                                            //    continue;
+                                            //}
 
                                             EditPoint start = method.GetStartPoint().CreateEditPoint();
                                             string body = start.GetText(method.GetEndPoint());
@@ -154,7 +159,7 @@ namespace VSIXProject2
                 }
 
             }
-            return "Done";
+            return "با موفقیت انجام شد.";
 
 
 

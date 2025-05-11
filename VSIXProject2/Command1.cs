@@ -91,7 +91,7 @@ namespace VSIXProject2
             ThreadHelper.ThrowIfNotOnUIThread();
             string res = DoSearch.Solotions();
             string message = string.Format(CultureInfo.CurrentCulture, "Inside {0}.MenuItemCallback()", this.GetType().FullName);
-            string title = "Command1";
+            string title = "عملیات";
 
             // Show a message box to prove we were here
             VsShellUtilities.ShowMessageBox(
