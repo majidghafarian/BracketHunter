@@ -122,7 +122,7 @@ namespace VSIXProject2
                                                     allCsFiles.Add(match.Groups[1].Value);
                                                 }
                                             }
-                                            ///پاک کردن مقادیر تکراری 
+                                            ///ذخیره نکردن مقادیر  تکراری 
                                             for (int i = 0; i < allCsFiles.Count; i++)
                                             {
                                                 var res = allCsFiles[i];
@@ -137,7 +137,7 @@ namespace VSIXProject2
 
                                                 else
                                                 {
-                                                    SortData.Add(allCsFiles[i]);
+                                                    SortData.Add(allCsFiles[i].Trim());
                                                 }
 
 
