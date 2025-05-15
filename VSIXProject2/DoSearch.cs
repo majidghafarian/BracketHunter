@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace VSIXProject2
@@ -52,14 +50,13 @@ namespace VSIXProject2
 
     public static class DoSearch
     {
+
         private static void CsFiles(ProjectItem item, List<ProjectItem> collect)
         {
             if (item.Name.EndsWith(".cs"))
             {
                 collect.Add(item);
             }
-
-
             if (item.ProjectItems != null)
             {
                 foreach (ProjectItem child in item.ProjectItems)
@@ -72,33 +69,27 @@ namespace VSIXProject2
 
         public static string Solotions()
         {
-
             DTE dte = Package.GetGlobalService(typeof(DTE)) as DTE;
             if (dte != null && dte.Solution != null)
             {
-
-
                 foreach (Project item in dte.Solution.Projects)
                 {
                     ////یک کش موقت برای ریختن همه کلاس های که آخرش با .cs تموم میشه 
                     List<ProjectItem> itemssss = new List<ProjectItem>();
-
                     foreach (ProjectItem searchinproject in item.ProjectItems)
                     {
                         ////برای فایل های .cs تو در تو 
                         CsFiles(searchinproject, itemssss);
-
-
                     }
-
                     List<string> allCsFiles = new List<string>();
-
+                    List<string> SortData = new List<string>();
                     foreach (var itemfile in itemssss)
                     {
                         var child = itemfile.Name;
                         if (itemfile.FileCodeModel == null) continue;
                         foreach (CodeElement element in itemfile.FileCodeModel.CodeElements)
                         {
+                            ///بورو پیدا کن nmacespace 
                             if (element.Kind == vsCMElement.vsCMElementNamespace)
                             {
                                 foreach (CodeElement children in element.Children)
@@ -130,40 +121,42 @@ namespace VSIXProject2
                                                 {
                                                     allCsFiles.Add(match.Groups[1].Value);
                                                 }
+                                            }
+                                            ///پاک کردن مقادیر تکراری 
+                                            for (int i = 0; i < allCsFiles.Count; i++)
+                                            {
+                                                var res = allCsFiles[i];
+                                                if (SortData.Contains(allCsFiles[i]))
+                                                {
+                                                    continue;
+                                                }
+                                                else if (string.IsNullOrWhiteSpace(allCsFiles[i]))
+                                                {
+                                                    continue;
+                                                }
 
+                                                else
+                                                {
+                                                    SortData.Add(allCsFiles[i]);
+                                                }
 
 
                                             }
-
-
                                         }
-
                                     }
-
-
                                 }
-
                             }
-
-
                         }
-
                     }
-                    if (allCsFiles.Count > 0)
+                    if (SortData.Count > 0)
                     {
                         string filename = $"{item.Name}_{Guid.NewGuid()}.txt";
-                        string fullText = string.Join(Environment.NewLine, allCsFiles);
+                        string fullText = string.Join(Environment.NewLine, SortData);
                         File.WriteAllText($@"D:\New folder\{filename}", fullText);
                     }
-
                 }
-
             }
             return "با موفقیت انجام شد.";
-
-
-
-
 
         }
 
