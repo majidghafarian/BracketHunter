@@ -119,44 +119,132 @@ namespace VSIXProject2
                                                 var matches = Regex.Matches(lines[i], @"\[(.*?)\]");
                                                 foreach (Match match in matches)
                                                 {
+                                                    string value = match.Groups[1].Value;
+                                                    if (!value.EndsWith(":"))
+                                                        continue;
+                                                    else
+                                                    {
+                                                        value.TrimEnd(';');
+                                                        string newword = "[" + value + "]:";
+
+
+
+                                                    }
+
                                                     allCsFiles.Add(match.Groups[1].Value);
                                                 }
                                             }
                                             ///ذخیره نکردن مقادیر  تکراری 
                                             for (int i = 0; i < allCsFiles.Count; i++)
                                             {
-                                                var res = allCsFiles[i];
-                                                if (SortData.Contains(allCsFiles[i]) || string.IsNullOrWhiteSpace(res))
+                                                var res = allCsFiles[i].Trim();
+                                                if (SortData.Contains(res) || string.IsNullOrWhiteSpace(res))
                                                 {
                                                     continue;
                                                 }
-                                                SortData.Add(res.Trim());
-                                                string selectedword = SortData.Last();
-                                                if (selectedword.EndsWith(":"))
-                                                {
-                                                    selectedword = selectedword.TrimEnd(':');
-                                                    string newword = "[" + selectedword + "]:";
+                                                //SortData.Add(res.Trim());
+                                                //string selectedword = SortData.Last();
+                                                //if (selectedword.EndsWith(":"))
+                                                //{
+                                                //    selectedword = selectedword.TrimEnd(':');
+                                                //    string newword = "[" + selectedword + "]:";
 
-                                                    SortData.Add(newword);
+                                                //    SortData.Add(newword);
+                                                //}
+                                                else
+                                                {
+                                                    SortData.Add(allCsFiles[i].Trim());
                                                 }
                                             }
                                         }
                                     }
                                 }
                             }
-                            if (SortData.Count > 0)
-                            {
-                                string filename = $"{item.Name}_{Guid.NewGuid()}.txt";
-                                string fullText = string.Join(Environment.NewLine, SortData);
-                                File.WriteAllText($@"D:\New folder\{filename}", fullText);
-                            }
+
                         }
+
+                    }
+                    if (SortData.Count > 0)
+                    {
+                        string filename = $"{item.Name}_{Guid.NewGuid()}.txt";
+                        string fullText = string.Join(Environment.NewLine, SortData);
+                        File.WriteAllText($@"D:\New folder\{filename}", fullText);
                     }
                 }
             }
             return "با موفقیت انجام شد.";
 
         }
+
+
+        public static string Replace()
+        {
+            DTE dte = Package.GetGlobalService(typeof(DTE)) as DTE;
+            if (dte != null && dte.Solution != null)
+            {
+                foreach (Project item in dte.Solution.Projects)
+                {
+                    ////یک کش موقت برای ریختن همه کلاس های که آخرش با .cs تموم میشه 
+                    List<ProjectItem> itemssss = new List<ProjectItem>();
+                    foreach (ProjectItem searchinproject in item.ProjectItems)
+                    {
+                        ////برای فایل های .cs تو در تو 
+                        CsFiles(searchinproject, itemssss);
+                    }
+                    foreach (var itemfile in itemssss)
+                    {
+                        var child = itemfile.Name;
+                        if (itemfile.FileCodeModel == null) continue; 
+
+                        foreach (CodeElement element in itemfile.FileCodeModel.CodeElements)
+                        {
+                            if (element.Kind == vsCMElement.vsCMElementNamespace)
+                            {
+                                foreach (CodeElement children in element.Children)
+                                {
+                                    if (children.Kind == vsCMElement.vsCMElementClass)
+                                    {
+                                        foreach (CodeElement children2 in children.Children)
+                                        {
+                                            if (children2 is CodeFunction method)
+                                            {
+                                                EditPoint start = method.GetStartPoint().CreateEditPoint();
+                                                EditPoint end = method.GetEndPoint().CreateEditPoint();
+
+                                                string body = start.GetText(end);
+
+                                                // ویرایش محتوای body
+                                                var matches = Regex.Matches(body, @"\[(.*?)\]");
+                                                foreach (Match match in matches)
+                                                {
+                                                    var value = match.Groups[1].Value;
+
+                                                    if (!value.EndsWith(":"))
+                                                        continue;
+
+                                                    string replaced = "[" + value.TrimEnd(':') + "]:";
+                                                    body = body.Replace(match.Value, replaced);
+                                                }
+
+                                                // پاک کردن محتوای قدیمی و نوشتن محتوای جدید
+                                                start.Delete(end);
+                                                start.Insert(body);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+
+                    }
+
+                }
+            }
+            return "با موفقیت انجام شد.";
+
+        }
+
 
     }
 }
