@@ -126,33 +126,31 @@ namespace VSIXProject2
                                             for (int i = 0; i < allCsFiles.Count; i++)
                                             {
                                                 var res = allCsFiles[i];
-                                                if (SortData.Contains(allCsFiles[i]))
+                                                if (SortData.Contains(allCsFiles[i]) || string.IsNullOrWhiteSpace(res))
                                                 {
                                                     continue;
                                                 }
-                                                else if (string.IsNullOrWhiteSpace(allCsFiles[i]))
+                                                SortData.Add(res.Trim());
+                                                string selectedword = SortData.Last();
+                                                if (selectedword.EndsWith(":"))
                                                 {
-                                                    continue;
+                                                    selectedword = selectedword.TrimEnd(':');
+                                                    string newword = "[" + selectedword + "]:";
+
+                                                    SortData.Add(newword);
                                                 }
-
-                                                else
-                                                {
-                                                    SortData.Add(allCsFiles[i].Trim());
-                                                }
-
-
                                             }
                                         }
                                     }
                                 }
                             }
+                            if (SortData.Count > 0)
+                            {
+                                string filename = $"{item.Name}_{Guid.NewGuid()}.txt";
+                                string fullText = string.Join(Environment.NewLine, SortData);
+                                File.WriteAllText($@"D:\New folder\{filename}", fullText);
+                            }
                         }
-                    }
-                    if (SortData.Count > 0)
-                    {
-                        string filename = $"{item.Name}_{Guid.NewGuid()}.txt";
-                        string fullText = string.Join(Environment.NewLine, SortData);
-                        File.WriteAllText($@"D:\New folder\{filename}", fullText);
                     }
                 }
             }
@@ -162,4 +160,5 @@ namespace VSIXProject2
 
     }
 }
+
 
