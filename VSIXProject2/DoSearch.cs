@@ -218,7 +218,7 @@ namespace VSIXProject2
                                                 var matches = regex.Matches(line);
                                                 foreach (Match match in matches)
                                                 {
-                                                    string value = match.Groups[1].Value.Trim();
+                                                    string value = match.Groups[1].Value;
 
                                                     if (!string.IsNullOrWhiteSpace(value))
                                                     {
@@ -293,7 +293,7 @@ namespace VSIXProject2
                                                 {
                                                     var value = match.Groups[1].Value.Trim();
 
-                                                    if (!value.Contains(":"))
+                                                    if (!value.EndsWith(":"))
                                                         continue;
 
                                                     string replaced = "[" + value.TrimEnd(':').Trim() + "]:";
