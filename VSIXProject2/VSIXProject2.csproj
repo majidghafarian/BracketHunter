@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Command1.cs" />
     <Compile Include="DoSearch.cs" />
+    <Compile Include="MineWordFarsi.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VSIXProject2Package.cs" />
   </ItemGroup>

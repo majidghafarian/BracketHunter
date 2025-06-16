@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace VSIXProject2
 {
-    public static class DoSearch
+    public static class MineWordFarsi
     {
         private static void CsFiles(ProjectItem item, List<ProjectItem> collect)
         {
@@ -23,7 +23,7 @@ namespace VSIXProject2
                     CsFiles(child, collect);
                 }
             }
-        }  
+        }
         public static string Solotions()
         {
             DTE dte = Package.GetGlobalService(typeof(DTE)) as DTE;
@@ -39,8 +39,8 @@ namespace VSIXProject2
                     }
 
                     HashSet<string> SortData = new HashSet<string>(); // برای جلوگیری از مقادیر تکراری
-                    Regex regex = new Regex(@"\[(.*?)\]");
-
+                    Regex regex = new Regex("\"([^\"]+)\"");
+                    Regex persianRegex = new Regex(@"[\u0600-\u06FF]");
                     foreach (var itemfile in itemssss)
                     {
                         if (itemfile.FileCodeModel == null) continue;
@@ -53,11 +53,11 @@ namespace VSIXProject2
                                 {
                                     if (children is CodeFunction method)
                                     {
-                                        ProcessCodeBody(method.GetStartPoint(), method.GetEndPoint(), regex, SortData);
+                                        ProcessCodeBody(method.GetStartPoint(), method.GetEndPoint(), regex, SortData, persianRegex);
                                     }
                                     else if (children is CodeEnum enumtype)
                                     {
-                                        ProcessCodeBody(enumtype.GetStartPoint(), enumtype.GetEndPoint(), regex, SortData);
+                                        ProcessCodeBody(enumtype.GetStartPoint(), enumtype.GetEndPoint(), regex, SortData, persianRegex);
                                     }
                                     else if (children is CodeClass cls)
                                     {
@@ -65,7 +65,7 @@ namespace VSIXProject2
                                         {
                                             if (member is CodeFunction m)
                                             {
-                                                ProcessCodeBody(m.GetStartPoint(), m.GetEndPoint(), regex, SortData);
+                                                ProcessCodeBody(m.GetStartPoint(), m.GetEndPoint(), regex, SortData, persianRegex);
                                             }
                                         }
                                     }
@@ -74,7 +74,7 @@ namespace VSIXProject2
                             else if (element.Kind == vsCMElement.vsCMElementEnum)
                             {
                                 var enumtype = (CodeEnum)element;
-                                ProcessCodeBody(enumtype.GetStartPoint(), enumtype.GetEndPoint(), regex, SortData);
+                                ProcessCodeBody(enumtype.GetStartPoint(), enumtype.GetEndPoint(), regex, SortData, persianRegex);
                             }
 
                         }
@@ -87,18 +87,20 @@ namespace VSIXProject2
                         string fullText = string.Join(Environment.NewLine, SortData);
                         File.WriteAllText($@"D:\New folder\{filename}", fullText);
                     }
-               
+
                 }
 
             }
 
             return "با موفقیت انجام شد.";
         }
-        static void ProcessCodeBody(TextPoint start, TextPoint end, Regex regex, HashSet<string> SortData)
+        static void ProcessCodeBody(TextPoint start, TextPoint end, Regex regex, HashSet<string> SortData, Regex persianRegex)
         {
             EditPoint editStart = start.CreateEditPoint();
             string body = editStart.GetText(end);
             string[] lines = body.Split('\n');
+
+
 
             foreach (string line in lines)
             {
@@ -106,7 +108,7 @@ namespace VSIXProject2
                 foreach (Match match in matches)
                 {
                     string value = match.Groups[1].Value;
-                    if (!string.IsNullOrWhiteSpace(value))
+                    if (!string.IsNullOrWhiteSpace(value) && persianRegex.IsMatch(value))
                     {
                         SortData.Add(value);
                     }
@@ -130,7 +132,7 @@ namespace VSIXProject2
                     foreach (var itemfile in itemssss)
                     {
                         var child = itemfile.Name;
-                        if (itemfile.FileCodeModel == null) continue; 
+                        if (itemfile.FileCodeModel == null) continue;
 
                         foreach (CodeElement element in itemfile.FileCodeModel.CodeElements)
                         {
@@ -180,13 +182,5 @@ namespace VSIXProject2
             return "با موفقیت انجام شد.";
 
         }
-
-
     }
 }
-
-
-
-
-
-
