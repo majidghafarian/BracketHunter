@@ -105,7 +105,7 @@ namespace VSIXProject2
                 var matches = regex.Matches(line);
                 foreach (Match match in matches)
                 {
-                    string value = match.Groups[1].Value;
+                    string value = match.Groups[1].Value.Replace("ـ", "");
                     if (!string.IsNullOrWhiteSpace(value))
                     {
                         SortData.Add(value);

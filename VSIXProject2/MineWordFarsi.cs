@@ -40,6 +40,7 @@ namespace VSIXProject2
 
                     HashSet<string> SortData = new HashSet<string>(); // برای جلوگیری از مقادیر تکراری
                     Regex regex = new Regex("\"([^\"]+)\"");
+                    //Regex regex = new Regex(@"\[(.*?)\]");
                     Regex persianRegex = new Regex(@"[\u0600-\u06FF]");
                     foreach (var itemfile in itemssss)
                     {
@@ -99,7 +100,7 @@ namespace VSIXProject2
             EditPoint editStart = start.CreateEditPoint();
             string body = editStart.GetText(end);
             string[] lines = body.Split('\n');
-
+            Regex regexForBraket = new Regex(@"\[(.*?)\]");
 
 
             foreach (string line in lines)
@@ -107,10 +108,19 @@ namespace VSIXProject2
                 var matches = regex.Matches(line);
                 foreach (Match match in matches)
                 {
-                    string value = match.Groups[1].Value;
+                    string value = match.Groups[1].Value.Replace("ـ","");
                     if (!string.IsNullOrWhiteSpace(value) && persianRegex.IsMatch(value))
                     {
-                        SortData.Add(value);
+                        if (value.Contains("[") && value.Contains("]"))
+                        {
+                            foreach (Match m in regexForBraket.Matches(value))
+                            {
+                                SortData.Add(m.Groups[1].Value);
+                            }
+                        }
+                        else { 
+                            SortData.Add(value);
+                        }
                     }
                 }
             }

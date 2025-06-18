@@ -87,7 +87,7 @@ namespace VSIXProject2
         private void Execute(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            string res = DoSearch.Solotions();
+            string res = MineWordFarsi.Solotions();
             string message = string.Format(CultureInfo.CurrentCulture, "Inside {0}.MenuItemCallback()", this.GetType().FullName);
             string title = "عملیات";
 
